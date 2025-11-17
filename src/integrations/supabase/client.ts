@@ -6,8 +6,16 @@ import type { Database } from './types';
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
+// Debug logging
+console.log('Supabase initialization:', {
+  url: SUPABASE_URL ? `${SUPABASE_URL.substring(0, 30)}...` : 'missing',
+  keyExists: !!SUPABASE_PUBLISHABLE_KEY,
+  keyLength: SUPABASE_PUBLISHABLE_KEY?.length,
+});
+
 // Validate that required environment variables are set
 if (!SUPABASE_URL) {
+  console.error('Missing VITE_SUPABASE_URL');
   throw new Error(
     'Missing VITE_SUPABASE_URL environment variable. ' +
     'Please check your .env file or Vercel environment variables.'
@@ -15,6 +23,7 @@ if (!SUPABASE_URL) {
 }
 
 if (!SUPABASE_PUBLISHABLE_KEY) {
+  console.error('Missing VITE_SUPABASE_PUBLISHABLE_KEY');
   throw new Error(
     'Missing VITE_SUPABASE_PUBLISHABLE_KEY environment variable. ' +
     'Please check your .env file or Vercel environment variables.'
@@ -25,3 +34,14 @@ if (!SUPABASE_PUBLISHABLE_KEY) {
 // import { supabase } from "@/integrations/supabase/client";
 
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+
+// Test connection
+supabase.auth.getSession().then(({ data, error }) => {
+  if (error) {
+    console.error('Supabase connection error:', error);
+  } else {
+    console.log('Supabase connected successfully');
+  }
+}).catch((err) => {
+  console.error('Supabase initialization error:', err);
+});

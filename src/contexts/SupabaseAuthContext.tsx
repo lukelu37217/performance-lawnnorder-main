@@ -124,12 +124,23 @@ export const SupabaseAuthProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
   const signIn = async (email: string, password: string) => {
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      console.log('Attempting login with:', email);
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
-      return { error: error ? new Error('Invalid email or password') : null };
+
+      if (error) {
+        console.error('Auth error:', error);
+        // Show more detailed error for debugging
+        const errorMessage = error.message || 'Invalid email or password';
+        return { error: new Error(errorMessage) };
+      }
+
+      console.log('Login successful:', data.user?.id);
+      return { error: null };
     } catch (err) {
+      console.error('Catch error:', err);
       return { error: new Error('Authentication failed. Please try again.') };
     }
   };
