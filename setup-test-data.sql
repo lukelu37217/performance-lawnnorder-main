@@ -181,16 +181,12 @@ ON CONFLICT DO NOTHING;
 
 UPDATE profiles
 SET entity_id = (SELECT id FROM foremen WHERE name = 'Dylan Foreman')
-WHERE name = 'dylan'
-ON CONFLICT (id) DO UPDATE SET
-  entity_id = EXCLUDED.entity_id;
+WHERE name = 'dylan';
 
 -- Set Dylan as a foreman
 UPDATE user_roles
 SET role = 'foreman'
-WHERE user_id = (SELECT id FROM profiles WHERE name = 'dylan')
-ON CONFLICT (id) DO UPDATE SET
-  role = EXCLUDED.role;
+WHERE user_id = (SELECT id FROM profiles WHERE name = 'dylan');
 
 -- ============================================================================
 -- Step 7: Verification Queries
