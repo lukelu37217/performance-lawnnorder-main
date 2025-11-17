@@ -39,23 +39,45 @@ export const SupabaseAuthProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const [isLoading, setIsLoading] = useState(true);
 
   const loadUserProfile = async (userId: string) => {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('name, entity_id')
-      .eq('id', userId)
-      .single();
+    try {
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('name, entity_id')
+        .eq('id', userId)
+        .single();
 
-    const { data: roleData } = await supabase
-      .from('user_roles')
-      .select('role')
-      .eq('user_id', userId)
-      .single();
+      if (profileError) {
+        console.warn('Profile not found:', profileError);
+        return {
+          name: '',
+          entityId: null,
+          role: 'foreman' as UserRole,
+        };
+      }
 
-    return {
-      name: profile?.name || '',
-      entityId: profile?.entity_id || null,
-      role: (roleData?.role || 'foreman') as UserRole,
-    };
+      const { data: roleData, error: roleError } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', userId)
+        .single();
+
+      if (roleError) {
+        console.warn('User role not found:', roleError);
+      }
+
+      return {
+        name: profile?.name || '',
+        entityId: profile?.entity_id || null,
+        role: (roleData?.role || 'foreman') as UserRole,
+      };
+    } catch (error) {
+      console.error('Error loading user profile:', error);
+      return {
+        name: '',
+        entityId: null,
+        role: 'foreman' as UserRole,
+      };
+    }
   };
 
   useEffect(() => {
